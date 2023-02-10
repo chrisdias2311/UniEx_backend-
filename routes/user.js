@@ -14,19 +14,19 @@ const URL = `localhost:5000`
 
 
 // Signup
-router.post('/signup', (req, res) => {
-    const newUser = new User({
-        email: req.body.email,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        password: req.body.password,
-        idCard: req.body.idCard
-    });
+// router.post('/signup', (req, res) => {
+//     const newUser = new User({
+//         email: req.body.email,
+//         firstname: req.body.firstname,
+//         lastname: req.body.lastname,
+//         password: req.body.password,
+//         idCard: req.body.idCard
+//     });
 
-    newUser.save()
-        .then(newUser => res.json(newUser))
-        .catch(err => res.status(400).json(err));
-})
+//     newUser.save()
+//         .then(newUser => res.json(newUser))
+//         .catch(err => res.status(400).json(err));
+// })
 
 
 
@@ -38,19 +38,27 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
         console.log("This is REQ FILE =", req.file);
 
         const newUser = new User({
+            pid: req.body.pid,
             email: req.body.email,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
+            phone: req.body.phone,
+            year: req.body.year,
+            dept: req.body.dept,
+            class: req.body.class,
             password: req.body.password,
-            IDcard: `${URL}/api/image/${req.file.filename}`
+            IDcard: `${URL}/api/image/${req.file.filename}`,
+            validity: 'Yes', //
         });
 
         const saved = await newUser.save();
-        res.send(newUser);
+        // res.send(newUser);
+        res.send("Your Request was sent Successfully!")
 
 
     } catch (error) {
         console.log(error);
+        res.send(error)
     }
 
     // console.log("This is req body", req.body);
@@ -87,5 +95,37 @@ router.post("/login", async (req, res) => {
     }
 })
 
+router.get('/unvalidusers', async (req, res) => {
+
+    try {
+        let users = await User.find({ validity: 'No' });
+        if (users.length > 0) {
+            res.send(users);
+        } else {
+            res.send({ result: "No users found" })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+
+
+
+// app.get("/products", async (req, resp) => {
+//     let products = await Product.find();
+//     if (products.length > 0) {
+//         resp.send(products)
+//     } else {
+//         resp.send({ result: "No products found" });
+//     }
+// })
+
+
+// app.delete("/product/:id", async (req, resp) => {
+//     const result = await Product.deleteOne({ _id: req.params.id });
+//     resp.send(result);
+//     console.log(result)
+// })
 
 module.exports = router;

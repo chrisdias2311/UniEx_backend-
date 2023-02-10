@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = mongoose.Schema({
+const adminSchema = mongoose.Schema({
     pid:{
         type: String,
         required: true,
@@ -19,18 +19,6 @@ const userSchema = mongoose.Schema({
         type: String,
         // required: true,
     },
-    phone:{
-        type:String,
-    },
-    year:{
-        type: String,
-    },
-    dept:{
-        type: String,
-    },
-    class:{
-        type: String,
-    },
     password: {
         type: String,
         // required: true
@@ -40,13 +28,10 @@ const userSchema = mongoose.Schema({
         // required: true,
         // required: true
     },
-    validity:{
-        type: String,
-    }
 });
 
 
 // userSchema.plugin(passportLocalMongoose);
 // userSchema.plugin(findOrCreate);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Admin', adminSchema);
