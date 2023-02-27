@@ -6,6 +6,8 @@ const passport = require('passport');
 const { application } = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('../middlewares/multer')
+const otpGenerator = require('otp-generator');
+const auth = require('../mailhandelling/auth');
 
 const secretKey = "secretKey";
 
@@ -16,26 +18,44 @@ const URL = `localhost:5000`
 
 //Rigister (alternative to Signup)
 router.post("/register", multer.upload.single("file"), async (req, res) => {
+    
+    const saltRounds = 10;
     try {
         const user = await User.findOne({ email: req.body.email })
         if (user) return res.status(400).send("Account already exists");
         console.log("This is REQ FILE =", req.file);
-
-        const newUser = new User({
-            pid: req.body.pid,
-            email: req.body.email,
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            phone: req.body.phone,
-            year: req.body.year,
-            dept: req.body.dept,
-            class: req.body.class,
-            password: req.body.password,
-            IDcard: `${URL}/api/image/${req.file.filename}`,
-            validity: 'No', //Default validity of user is no 
-        });
-
-        const saved = await newUser.save();
+        //bcrypt encryption
+        bcrypt.hash(req.body.password,saltRounds,async (err,hash)=>{
+            if(err){
+                res.send('error generating hash')
+            }
+            else{
+            const newUser = new User({
+                pid: req.body.pid,
+                email: req.body.email,
+                firstname: req.body.firstname,
+                lastname: req.body.lastname,
+                phone: req.body.phone,
+                year: req.body.year,
+                dept: req.body.dept,
+                class: req.body.class,
+                password: hash,
+                IDcard: `${URL}/api/image/${req.file.filename}`,
+                validity: 'No', //Default validity of user is no 
+            });
+            const saved =await newUser.save((err,user)=>{
+                if(err){
+                    console.log(err);
+                    res.send(400,'bad request');
+                }
+                else{
+                    res.send(saved);
+                }
+            });
+        }
+        })
+ 
+        //const saved = await newUser.save();
         // res.send(newUser);
         res.send(newUser)
 
@@ -67,10 +87,19 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
 router.post("/login", async(req, res) => {
     try {
         console.log("The request:", req.body)
-        let user = await User.findOne(req.body);
+        let user = await User.findOne({email:req.body.email});
+
         console.log(user);
         if(user){
+            //bcrypt compare
+            const match = await bcrypt.compare(req.body.password,user.password);
+            if(match){ 
             res.send(user);
+            }
+            else{
+                console.log('incorrect password')
+                res.send('incorrect password')
+            }
         }else{
             res.send("No user found");
         }
@@ -112,6 +141,44 @@ router.put("/declineuser/:id", async(req, res)=> {
         }
     )
     res.send(result);
+})
+
+router.get('/generateotp/:id',async(req,res)=>
+{
+    
+    const otp = otpGenerator.generate(6,{lowerCaseAlphabets:false,specialChars:false});
+    const user =  await User.findOne({_id:req.params.id})
+    if(user.validity == 'yes')
+    {
+        res.send("already verified")
+    }
+    else{
+    try{
+        
+        User.updateOne({_id:req.params.id},{$set:{validity:otp}})
+        auth.sendOtp(otp,user.email);
+    }catch(err){
+        console.log(err)
+    }
+    res.send('generated');
+}
+})
+
+router.get('/verifyotp/:id/:otp',async(req,res)=>{
+    const user = await User.findOne({_id:req.params.id});
+    if(user.validity == 'yes')
+    {
+        res.send("already verified")
+    }
+    else{
+        if(user.validity == otp)
+        {
+        const update = await User.updateOne({_id:req.params.id},{$set:{validity:'yes'}})
+        console.log("verified");
+        res.send(update);
+            
+    }
+    }
 })
 
 module.exports = router;
