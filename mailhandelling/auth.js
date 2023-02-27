@@ -7,7 +7,7 @@ async function sendOtp(otp, email){
             port:587,
             secure:false,
             auth:{
-                user: "jasonsampy88@gmail.com", //addacc
+                user: "jasonsampy88@gmail.com", //add acc
                 pass:"lsuhlqxqogwerbdq"//change
             }
         }
@@ -24,4 +24,4 @@ async function sendOtp(otp, email){
 
 }
 
-module.exports = sendOtp;
+module.exports = {sendOtp};

@@ -26,6 +26,7 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
         console.log("This is REQ FILE =", req.file);
         //bcrypt encryption
         bcrypt.hash(req.body.password,saltRounds,async (err,hash)=>{
+            console.log(hash);
             if(err){
                 res.send('error generating hash')
             }
@@ -34,7 +35,7 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                 pid: req.body.pid,
                 email: req.body.email,
                 firstname: req.body.firstname,
-                lastname: req.body.lastname,
+                lastname: req.body.lastname,    
                 phone: req.body.phone,
                 year: req.body.year,
                 dept: req.body.dept,
@@ -49,17 +50,14 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                     res.send(400,'bad request');
                 }
                 else{
-                    res.send(saved);
+                    res.send(user);
                 }
             });
         }
         })
- 
         //const saved = await newUser.save();
         // res.send(newUser);
-        res.send(newUser)
-
-
+        //res.send(newUser)
     } catch (error) {
         console.log(error);
         res.send(error)
@@ -94,7 +92,8 @@ router.post("/login", async(req, res) => {
             //bcrypt compare
             const match = await bcrypt.compare(req.body.password,user.password);
             if(match){ 
-            res.send(user);
+                console.log('match')
+            res.send(user); //dont think we should send user!!!!
             }
             else{
                 console.log('incorrect password')
@@ -147,38 +146,45 @@ router.get('/generateotp/:id',async(req,res)=>
 {
     
     const otp = otpGenerator.generate(6,{lowerCaseAlphabets:false,specialChars:false});
-    const user =  await User.findOne({_id:req.params.id})
+    const user =  await User.findOne({email:req.params.id})
     if(user.validity == 'yes')
     {
         res.send("already verified")
     }
     else{
     try{
-        
-        User.updateOne({_id:req.params.id},{$set:{validity:otp}})
+        let test =await User.updateOne({_id:user._id},{$set:{validity:otp}})
+        console.log(test);
         auth.sendOtp(otp,user.email);
+
+    res.send('generated');
     }catch(err){
         console.log(err)
+        res.send(err);
     }
-    res.send('generated');
 }
 })
 
 router.get('/verifyotp/:id/:otp',async(req,res)=>{
-    const user = await User.findOne({_id:req.params.id});
+
+    const user =  await User.findOne({email:req.params.id});
+    console.log(user);
+
     if(user.validity == 'yes')
     {
         res.send("already verified")
     }
     else{
-        if(user.validity == otp)
+        if(user.validity == req.params.otp)
         {
-        const update = await User.updateOne({_id:req.params.id},{$set:{validity:'yes'}})
+            console.log('passed')
+        const update = await User.updateOne({email:req.params.id},{$set:{validity:'yes'}})
         console.log("verified");
         res.send(update);
             
     }
     }
+
 })
 
 module.exports = router;
