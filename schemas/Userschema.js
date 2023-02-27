@@ -42,6 +42,9 @@ const userSchema = mongoose.Schema({
     },
     validity:{
         type: String,
+    },
+    verified:{
+        type:String,
     }
 });
 

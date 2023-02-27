@@ -18,42 +18,43 @@ const URL = `localhost:5000`
 
 //Rigister (alternative to Signup)
 router.post("/register", multer.upload.single("file"), async (req, res) => {
-    
+
     const saltRounds = 10;
     try {
         const user = await User.findOne({ email: req.body.email })
         if (user) return res.status(400).send("Account already exists");
         console.log("This is REQ FILE =", req.file);
         //bcrypt encryption
-        bcrypt.hash(req.body.password,saltRounds,async (err,hash)=>{
+        bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
             console.log(hash);
-            if(err){
+            if (err) {
                 res.send('error generating hash')
             }
-            else{
-            const newUser = new User({
-                pid: req.body.pid,
-                email: req.body.email,
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,    
-                phone: req.body.phone,
-                year: req.body.year,
-                dept: req.body.dept,
-                class: req.body.class,
-                password: hash,
-                IDcard: `${URL}/api/image/${req.file.filename}`,
-                validity: 'No', //Default validity of user is no 
-            });
-            const saved =await newUser.save((err,user)=>{
-                if(err){
-                    console.log(err);
-                    res.send(400,'bad request');
-                }
-                else{
-                    res.send(user);
-                }
-            });
-        }
+            else {
+                const newUser = new User({
+                    pid: req.body.pid,
+                    email: req.body.email,
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname,
+                    phone: req.body.phone,
+                    year: req.body.year,
+                    dept: req.body.dept,
+                    class: req.body.class,
+                    password: hash,
+                    IDcard: `${URL}/api/image/${req.file.filename}`,
+                    validity: 'No', //Default validity of user is no 
+                    verified: 'No'
+                });
+                const saved = await newUser.save((err, user) => {
+                    if (err) {
+                        console.log(err);
+                        res.send(400, 'bad request');
+                    }
+                    else {
+                        res.send(user);
+                    }
+                });
+            }
         })
         //const saved = await newUser.save();
         // res.send(newUser);
@@ -82,24 +83,24 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
 //     }
 // })
 
-router.post("/login", async(req, res) => {
+router.post("/login", async (req, res) => {
     try {
         console.log("The request:", req.body)
-        let user = await User.findOne({email:req.body.email});
+        let user = await User.findOne({ email: req.body.email });
 
         console.log(user);
-        if(user){
+        if (user) {
             //bcrypt compare
-            const match = await bcrypt.compare(req.body.password,user.password);
-            if(match){ 
+            const match = await bcrypt.compare(req.body.password, user.password);
+            if (match) {
                 console.log('match')
-            res.send(user); //dont think we should send user!!!!
+                res.send(user); //dont think we should send user!!!!
             }
-            else{
+            else {
                 console.log('incorrect password')
                 res.send('incorrect password')
             }
-        }else{
+        } else {
             res.send("No user found");
         }
     } catch (error) {
@@ -111,8 +112,11 @@ router.post("/login", async(req, res) => {
 
 router.get('/invalidusers', async (req, res) => {
     try {
-        let users = await User.find({ validity: 'No' });
+        let users = await User.find(
+            { validity: 'No'}
+        );
         if (users.length > 0) {
+            console.log(users)
             res.send(users);
         } else {
             res.send({ result: "No users found" })
@@ -122,7 +126,20 @@ router.get('/invalidusers', async (req, res) => {
     }
 })
 
-router.put("/validateuser/:id", async(req, res)=> {
+router.post('/getuser', async (req, res) => {
+    try {
+        let user = await User.findOne({ email: req.body.verifyEmail })
+        if (user) {
+            res.send(user)
+        } else {
+            res.send("No user found")
+        }
+    } catch (error) {
+
+    }
+})
+
+router.put("/validateuser/:id", async (req, res) => {
     let result = await User.updateOne(
         { _id: req.params.id },
         {
@@ -132,7 +149,7 @@ router.put("/validateuser/:id", async(req, res)=> {
     res.send(result);
 })
 
-router.put("/declineuser/:id", async(req, res)=> {
+router.put("/declineuser/:id", async (req, res) => {
     let result = await User.updateOne(
         { _id: req.params.id },
         {
@@ -142,47 +159,44 @@ router.put("/declineuser/:id", async(req, res)=> {
     res.send(result);
 })
 
-router.get('/generateotp/:id',async(req,res)=>
-{
-    
-    const otp = otpGenerator.generate(6,{lowerCaseAlphabets:false,specialChars:false});
-    const user =  await User.findOne({email:req.params.id})
-    if(user.validity == 'yes')
-    {
+
+router.get('/generateotp/:id', async (req, res) => {
+
+    const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
+    const user = await User.findOne({ email: req.params.id })
+    if (user.validity == 'yes') {
         res.send("already verified")
     }
-    else{
-    try{
-        let test =await User.updateOne({_id:user._id},{$set:{validity:otp}})
-        console.log(test);
-        auth.sendOtp(otp,user.email);
+    else {
+        try {
+            let test = await User.updateOne({ _id: user._id }, { $set: { verified: otp } })
+            console.log(test);
+            auth.sendOtp(otp, user.email);
 
-    res.send('generated');
-    }catch(err){
-        console.log(err)
-        res.send(err);
+            res.send('generated');
+        } catch (err) {
+            console.log(err)
+            res.send(err);
+        }
     }
-}
 })
 
-router.get('/verifyotp/:id/:otp',async(req,res)=>{
+router.get('/verifyotp/:id/:otp', async (req, res) => {
 
-    const user =  await User.findOne({email:req.params.id});
+    const user = await User.findOne({ email: req.params.id });
     console.log(user);
 
-    if(user.validity == 'yes')
-    {
+    if (user.verified == 'yes') {
         res.send("already verified")
     }
-    else{
-        if(user.validity == req.params.otp)
-        {
+    else {
+        if (user.verified == req.params.otp) {
             console.log('passed')
-        const update = await User.updateOne({email:req.params.id},{$set:{validity:'yes'}})
-        console.log("verified");
-        res.send(update);
-            
-    }
+            const update = await User.updateOne({ email: req.params.id }, { $set: { verified: 'yes' } })
+            console.log("verified");
+            res.send(update);
+
+        }
     }
 
 })
