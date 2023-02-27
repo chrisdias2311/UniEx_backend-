@@ -30,6 +30,9 @@ const productSchema = mongoose.Schema({
     bookingStatus:{
         type: String,
     },
+    sellingDate:{
+        type:String,
+    },
     productImage: {
         type: String,
         // required: true,
