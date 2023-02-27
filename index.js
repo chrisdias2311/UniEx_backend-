@@ -52,6 +52,7 @@ app.use('/api/image', require('./middlewares/multer').router)
 app.use('/api/user', require('./routes/user'))
 app.use('/api/admin', require('./routes/admin'))
 app.use('/api/products', require('./routes/product'))
+app.use('/api/transactions', require('./routes/transactions'))
 
 
 
