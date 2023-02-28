@@ -20,6 +20,7 @@ const URL = `localhost:5000`
 router.post("/addproduct", multer.upload.single("file"), async (req, res) => {
     try {
         console.log(req.file)
+        //Will send the email
 
         const newProduct = new Product({
             ownerId: req.body.ownerId,
@@ -57,8 +58,8 @@ router.get('/allproducts', async (req, res) => {
 
 router.post('/myproducts', async (req, res) => {
     try {
-        console.log(req.body.ownerId)
-        let products = await Product.find({ ownerId: req.body.ownerId, bookingStatus:'available' });
+        // console.log(req.body.ownerId)
+        let products = await Product.find({ ownerId: req.body.ownerId, bookingStatus: 'available' });
         if (products.length > 0) {
             res.send(products);
         } else {
@@ -148,6 +149,8 @@ router.post('/bookproduct', async (req, res) => {
             let transDate = (new Date).toString()
             let slicedDate = transDate.substring(0, 24);
 
+
+
             const newTransaction = new Transaction({
                 productId: req.body.id,
                 productName: req.body.productName,
@@ -194,6 +197,7 @@ router.post('/bookproduct', async (req, res) => {
 
 
     } catch (error) {
+        console.log("The error: ", error)
         res.status(400).send("UNSUCCESSFUL")
     }
 })
@@ -204,9 +208,12 @@ router.post('/downloadproduct', async (req, res) => {
     try {
         const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
         const SellerName = await Seller;
+        console.log("SELLERNAME:", 
+        SellerName)
 
         let transDate = (new Date).toString()
         let slicedDate = transDate.substring(0, 24);
+        
 
 
         const newTransaction = new Transaction({
@@ -232,13 +239,14 @@ router.post('/downloadproduct', async (req, res) => {
 router.post('/productdetails', async (req, res) => {
     try {
         let product = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.productid) });
-        if(product){
+        if (product) {
             res.send(product)
-        }else{
+        } else {
             res.send("No product found")
         }
     } catch (error) {
-        
+        console.log(error)
+        res.send(error)
     }
 })
 
@@ -259,12 +267,45 @@ router.post('/updateproduct', async (req, res) => {
             }
         )
         console.log(updated)
+        res.send(updated)
     } catch (error) {
         console.log(error)
     }
 })
 
+router.post('/deleteproduct', async (req, res) => {
+    try {
+        let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+        let gfs = multer.gfs.grid
+        let filename = toDelete.productImage
 
+        let temp = []
+        temp = filename.split("/")
+        console.log(temp)
+        let removingFile = temp[temp.length - 1]
+        // user_icon_1662560350693undefined
+        // console.log(removingFile);
+        try {
+            await gfs.files.deleteOne({ filename: removingFile })
+            console.log("Done")
+        } catch (error) {
+            console.log("Not Done")
+        }
+
+        try {
+            const result = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+            console.log("Deleted",result)
+            res.send(result);
+        } catch (error) {
+            console.log(error)
+            res.send(error)
+        }
+
+
+    } catch (error) {
+        res.status(400).send("UNSUCCESSFUL")
+    }
+})
 
 
 

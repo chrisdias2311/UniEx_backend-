@@ -201,4 +201,44 @@ router.get('/verifyotp/:id/:otp', async (req, res) => {
 
 })
 
+
+router.post('/updateuser', async (req, res) => {
+    try {
+        console.log(req.body)
+        let updated = await User.updateOne(
+            { _id: mongoose.Types.ObjectId(req.body.user_id) },
+            {
+                $set: {
+                    year: req.body.year,
+                    dept: req.body.department,
+                    class: req.body.class
+                }
+            }
+        )
+        console.log(updated)
+        res.send(updated)
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.post('/deleteuser', async (req, res) => {
+    try {
+        try {
+            const result = await User.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+            console.log("Deleted",result)
+            res.send(result);
+        } catch (error) {
+            console.log(error)
+            res.send(error)
+        }
+        
+    } catch (error) {
+        res.status(400).send("UNSUCCESSFUL")
+    }
+})
+
+
+
+
 module.exports = router;
