@@ -239,6 +239,62 @@ router.post('/deleteuser', async (req, res) => {
 })
 
 
+router.get('/generateotp_pass/:id',async(req,res)=>
+{
+    
+    const otp = otpGenerator.generate(6,{lowerCaseAlphabets:false,specialChars:false});
+    const user =  await User.findOne({email:req.params.id})
+    try{
+        let test =await User.updateOne({_id:user._id},{$set:{validity:otp}})
+        console.log(test);
+        pass_otp.sendOtp(otp,user.email);
 
+    res.send('generated');
+    }catch(err){
+        console.log(err)
+        res.send(err);
+    }
+
+})
+
+
+router.get('/verifyotp_pass/:id/:otp',async(req,res)=>{
+
+    const user =  await User.findOne({email:req.params.id});
+
+    if(user.otp == req.params.otp)
+    {        
+        const u_otp = await User.updateOne({email:req.params.id},{$set:{otp:'verified'}});
+        res.send('verified_otp');
+        //res.redirect       
+    }
+    else{
+        res.send('incorrect otp')
+    }
+
+})
+
+router.get('/change_pass/:id/:newpassword',async(req,res)=>
+{
+    
+    const user =  await User.findOne({_id:req.params.id});
+    if(user.otp == 'verified'){
+             
+        bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
+            if(err){
+                res.send('error has occured');
+            }
+            else{
+            const u_pass = await User.updateOne({_id:req.params.id},{$set:{password:hash}});
+            console.log('u_pass');
+            res.send('password updated')
+            }
+        })
+    }
+    else{
+        res.send('please verify otp first')
+    }
+    
+})
 
 module.exports = router;

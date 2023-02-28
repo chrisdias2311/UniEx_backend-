@@ -1,13 +1,17 @@
 
 const User = require('../schemas/Userschema')
-const connection = require('../database')
+const connection = require('../database');
 
 connection();
 
 async function test(){
-let test  = await User.updateOne({email:'jasonsampy88@gmail.com'},{$set:{validity:"yes"}})
-
-console.log(test);
+        User.find({"validity":"No","verified":"yes"},(error,data)=>{
+            if(error)
+            {
+                console.log(error)
+            }
+            console.log(data)
+        })
 }
 
 test();

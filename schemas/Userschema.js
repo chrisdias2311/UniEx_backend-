@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { stringify } = require("querystring");
 
 const userSchema = mongoose.Schema({
     pid:{
@@ -44,6 +45,9 @@ const userSchema = mongoose.Schema({
         type: String,
     },
     verified:{
+        type:String,
+    },
+    otp:{
         type:String,
     }
 });

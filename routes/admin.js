@@ -7,22 +7,36 @@ const { application } = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('../middlewares/multer')
 
+const bcrypt = require('bcryptjs');
 
 router.post("/register", async (req, res) => {
     try {
         const admin = await Admin.findOne({email: req.body.email});
         if (admin) return res.status(400).send("Account already exists");
-
-        const newAdmin = new Admin({
+        bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
+        
+            if(err){
+                console.log(error)
+                res.send(error)
+            }
+            const newAdmin = new Admin({
             pid: req.body.pid,
             email: req.body.email,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
-            password: req.body.password,
+            password: hash,
         })
 
-        const saved = await newAdmin.save();
-        res.send(newAdmin);
+        const saved = await newAdmin.save((err,user)=>{
+            if(err){
+                console.log(err);
+                res.send(400,'bad request');
+            }else{
+                res.send(user);
+            }
+            
+        });
+    })
 
     } catch (error) {
         console.log(error);
@@ -32,9 +46,18 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async(req, res) => {
     try {
-        let admin = await Admin.findOne(req.body);
+        let admin = await Admin.findOne(req.body.email);
+        
         if(admin){
-            res.send(admin);
+            const match = await bcrypt.compare(req.body.password, admin.password);
+            if (match) {
+                console.log('match')
+                res.send(admin); //dont think we should send user!!!!
+            }
+            else {
+                console.log('incorrect password')
+                res.send('incorrect password')
+            }
         }else{
             res.send("No user found");
         }
