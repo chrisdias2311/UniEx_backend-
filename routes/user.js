@@ -253,7 +253,7 @@ router.get('/generateotp_pass/:id',async(req,res)=>
     const otp = otpGenerator.generate(6,{lowerCaseAlphabets:false,specialChars:false});
     const user =  await User.findOne({email:req.params.id})
     try{
-        let test =await User.updateOne({_id:user._id},{$set:{validity:otp}})
+        let test =await User.updateOne({_id:user._id},{$set:{otp:otp}})
         console.log(test);
         pass_otp.sendOtp(otp,user.email);
 
