@@ -304,5 +304,18 @@ router.get('/change_pass/:id/:newpassword', async (req, res) => {
 
 })
 
+router.get('/allusers', async (req, res) => {
+    try {
+        let users = await User.find({ verified: 'yes' });
+        if (users.length > 0) {
+            res.send(users);
+        } else {
+            res.send({ result: "No users found" })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
 
 module.exports = router;
