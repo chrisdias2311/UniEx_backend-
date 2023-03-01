@@ -286,17 +286,18 @@ router.get('/change_pass/:id/:newpassword',async(req,res)=>
 {
     
     const user =  await User.findOne({email:req.params.id});
-    saltRounds =10;
+    const saltRounds =10;
     if(user.otp == 'verified'){
              
-        bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
+        bcrypt.hash(req.params.newpassword, saltRounds, async (err, hash) => {
             if(err){
-                res.send('error has occured');
+                res.send(err)
             }
             else{
             const u_pass = await User.updateOne({email:req.params.id},{$set:{password:hash}});
             console.log('u_pass');
-            res.send('password updated')
+            console.log(hash)
+            res.send(hash)
             }
         })
     }
