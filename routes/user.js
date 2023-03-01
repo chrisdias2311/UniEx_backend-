@@ -9,7 +9,7 @@ const multer = require('../middlewares/multer')
 const otpGenerator = require('otp-generator');
 const auth = require('../mailhandelling/auth');
 const mongoose = require('mongoose')
-
+const pass_otp = require('../mailhandelling/passotp')
 const secretKey = "secretKey";
 
 const URL = `localhost:5000`
