@@ -51,7 +51,7 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                         res.send(400, 'bad request');
                     }
                     else {
-                        res.send(user);
+                        res.send(User.findOne({ email:req.body.email },{password:0}));
                     }
                 });
             }
@@ -94,7 +94,7 @@ router.post("/login", async (req, res) => {
             const match = await bcrypt.compare(req.body.password, user.password);
             if (match) {
                 console.log('match')
-                res.send(user); //dont think we should send user!!!!
+                res.send(User.findOne({ email:req.body.email },{password:0})); //dont think we should send user!!!!
             }
             else {
                 console.log('incorrect password')
