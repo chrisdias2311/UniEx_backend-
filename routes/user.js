@@ -43,7 +43,8 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                     password: hash,
                     IDcard: `${URL}/api/image/${req.file.filename}`,
                     validity: 'No', //Default validity of user is no 
-                    verified: 'No'
+                    verified: 'No',
+                    otp:"null",
                 });
                 const saved = await newUser.save((err, user) => {
                     if (err) {
