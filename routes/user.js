@@ -148,23 +148,94 @@ router.post('/getuser', async (req, res) => {
 })
 
 router.put("/validateuser/:id", async (req, res) => {
-    let result = await User.updateOne(
-        { _id: req.params.id },
-        {
-            $set: req.body
+
+
+    try {
+
+        try {
+            let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.params.id) });
+            let gfs = multer.gfs.grid
+            let filename = toDelete.IDcard
+
+            let temp = []
+            temp = filename.split("/")
+            console.log(temp)
+            let removingFile = temp[temp.length - 1]
+
+            try {
+                await gfs.files.deleteOne({ filename: removingFile })
+                console.log("Done")
+            } catch (error) {
+                console.log("Not Done")
+            }
+
+        } catch (error) {
+            console.log(error)
         }
-    )
-    res.send(result);
+
+
+        try {
+            let result = await User.updateOne(
+                { _id: req.params.id },
+                {
+                    $set: req.body
+                }
+            )
+            res.send(result);
+        } catch (error) {
+            console.log(error);
+            res.send(error);
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.send(error)
+    }
 })
 
 router.put("/declineuser/:id", async (req, res) => {
-    let result = await User.updateOne(
-        { _id: req.params.id },
-        {
-            $set: req.body
+    try {
+
+        try {
+            let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.params.id) });
+            let gfs = multer.gfs.grid
+            let filename = toDelete.IDcard
+
+            let temp = []
+            temp = filename.split("/")
+            console.log(temp)
+            let removingFile = temp[temp.length - 1]
+
+            try {
+                await gfs.files.deleteOne({ filename: removingFile })
+                console.log("Done")
+            } catch (error) {
+                console.log("Not Done")
+            }
+
+        } catch (error) {
+            console.log(error)
         }
-    )
-    res.send(result);
+
+
+        try {
+            let result = await User.updateOne(
+                { _id: req.params.id },
+                {
+                    $set: req.body
+                }
+            )
+            res.send(result);
+        } catch (error) {
+            console.log(error);
+            res.send(error);
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.send(error)
+    }
+
 })
 
 
