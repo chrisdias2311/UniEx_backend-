@@ -44,17 +44,19 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                     IDcard: `${URL}/api/image/${req.file.filename}`,
                     validity: 'No', //Default validity of user is no 
                     verified: 'No',
-                    otp:"null",
+                    otp:"null"
                 });
                 const saved = await newUser.save((err, user) => {
                     if (err) {
                         console.log(err);
                         res.send(400, 'bad request');
                     }
-                    else {
-                        res.send(User.findOne({ email:req.body.email },{password:0}));
-                    }
                 });
+                if (saved){
+                    
+                    send_data = await User.findOne({ email:req.body.email },{password:0});
+                    res.send(send_data)
+                }
             }
         })
         //const saved = await newUser.save();
