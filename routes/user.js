@@ -286,6 +286,7 @@ router.get('/change_pass/:id/:newpassword',async(req,res)=>
 {
     
     const user =  await User.findOne({email:req.params.id});
+    saltRounds =10;
     if(user.otp == 'verified'){
              
         bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
