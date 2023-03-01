@@ -5,13 +5,8 @@ const connection = require('../database');
 connection();
 
 async function test(){
-        User.find({"validity":"No","verified":"yes"},(error,data)=>{
-            if(error)
-            {
-                console.log(error)
-            }
-            console.log(data)
-        })
+    const user = await User.findOne({ email:'jasonsampy88@gmail.com' },{password:0})
+    console.log(user);
 }
 
 test();

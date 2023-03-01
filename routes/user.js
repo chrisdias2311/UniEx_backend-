@@ -277,7 +277,7 @@ router.get('/verifyotp_pass/:id/:otp',async(req,res)=>{
 router.get('/change_pass/:id/:newpassword',async(req,res)=>
 {
     
-    const user =  await User.findOne({_id:req.params.id});
+    const user =  await User.findOne({email:req.params.id});
     if(user.otp == 'verified'){
              
         bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
@@ -285,7 +285,7 @@ router.get('/change_pass/:id/:newpassword',async(req,res)=>
                 res.send('error has occured');
             }
             else{
-            const u_pass = await User.updateOne({_id:req.params.id},{$set:{password:hash}});
+            const u_pass = await User.updateOne({email:req.params.id},{$set:{password:hash}});
             console.log('u_pass');
             res.send('password updated')
             }
