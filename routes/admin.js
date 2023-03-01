@@ -7,18 +7,18 @@ const { application } = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('../middlewares/multer')
 
-const bcrypt = require('bcryptjs');
+
 
 router.post("/register", async (req, res) => {
-    const saltRounds = 10;ssssssssssssssssss
+    const saltRounds = 10;   // ssssssssssssssssss
     try {
         const admin = await Admin.findOne({email: req.body.email});
         if (admin) return res.status(400).send("Account already exists");
         bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
         
             if(err){
-                console.log(error)
-                res.send(error)
+                console.log(err)
+                res.send(err)
             }
             const newAdmin = new Admin({
             pid: req.body.pid,
@@ -47,7 +47,8 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async(req, res) => {
     try {
-        let admin = await Admin.findOne(req.body.email);
+        console.log("Req: ", req.body)
+        let admin = await Admin.findOne({pid: req.body.pid});
         
         if(admin){
             const match = await bcrypt.compare(req.body.password, admin.password);
@@ -63,8 +64,8 @@ router.post("/login", async(req, res) => {
             res.send("No user found");
         }
     } catch (error) {
-        res.send(err);
-        console.log(err);
+        res.send(error);
+        console.log(error);
     }
 })
 
