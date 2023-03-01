@@ -51,12 +51,16 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                         console.log(err);
                         res.send(400, 'bad request');
                     }
-                });
-                if (saved){
+
+                    else{
+                        res.send(user)
+                    }
+                 });
+                // if (saved){
                     
-                    send_data = await User.findOne({ email:req.body.email },{password:0});
-                    res.send(send_data)
-                }
+                //     send_data = await User.findOne({ email:req.body.email },{password:0});
+                //     res.send(send_data)
+                // }
             }
         })
         //const saved = await newUser.save();
@@ -97,7 +101,7 @@ router.post("/login", async (req, res) => {
             const match = await bcrypt.compare(req.body.password, user.password);
             if (match) {
                 console.log('match')
-                res.send(User.findOne({ email:req.body.email },{password:0})); //dont think we should send user!!!!
+                res.send(user); //dont think we should send user!!!!
             }
             else {
                 console.log('incorrect password')
