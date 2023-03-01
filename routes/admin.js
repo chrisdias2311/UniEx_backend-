@@ -10,6 +10,7 @@ const multer = require('../middlewares/multer')
 const bcrypt = require('bcryptjs');
 
 router.post("/register", async (req, res) => {
+    const saltRounds = 10;ssssssssssssssssss
     try {
         const admin = await Admin.findOne({email: req.body.email});
         if (admin) return res.status(400).send("Account already exists");
