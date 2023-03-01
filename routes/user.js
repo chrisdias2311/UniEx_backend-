@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('../middlewares/multer')
 const otpGenerator = require('otp-generator');
 const auth = require('../mailhandelling/auth');
+const mongoose = require('mongoose')
 
 const secretKey = "secretKey";
 
