@@ -45,7 +45,7 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                     IDcard: `${URL}/api/image/${req.file.filename}`,
                     validity: 'No', //Default validity of user is no 
                     verified: 'No',
-                    otp:"null"
+                    otp: "null"
                 });
                 const saved = await newUser.save((err, user) => {
                     if (err) {
@@ -53,12 +53,12 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                         res.send(400, 'bad request');
                     }
 
-                    else{
+                    else {
                         res.send(user)
                     }
-                 });
+                });
                 // if (saved){
-                    
+
                 //     send_data = await User.findOne({ email:req.body.email },{password:0});
                 //     res.send(send_data)
                 // }
@@ -121,7 +121,7 @@ router.post("/login", async (req, res) => {
 router.get('/invalidusers', async (req, res) => {
     try {
         let users = await User.find(
-            { validity: 'No'}
+            { validity: 'No' }
         );
         if (users.length > 0) {
             console.log(users)
@@ -148,23 +148,94 @@ router.post('/getuser', async (req, res) => {
 })
 
 router.put("/validateuser/:id", async (req, res) => {
-    let result = await User.updateOne(
-        { _id: req.params.id },
-        {
-            $set: req.body
+
+
+    try {
+
+        try {
+            let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.params.id) });
+            let gfs = multer.gfs.grid
+            let filename = toDelete.IDcard
+
+            let temp = []
+            temp = filename.split("/")
+            console.log(temp)
+            let removingFile = temp[temp.length - 1]
+
+            try {
+                await gfs.files.deleteOne({ filename: removingFile })
+                console.log("Done")
+            } catch (error) {
+                console.log("Not Done")
+            }
+
+        } catch (error) {
+            console.log(error)
         }
-    )
-    res.send(result);
+
+
+        try {
+            let result = await User.updateOne(
+                { _id: req.params.id },
+                {
+                    $set: req.body
+                }
+            )
+            res.send(result);
+        } catch (error) {
+            console.log(error);
+            res.send(error);
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.send(error)
+    }
 })
 
 router.put("/declineuser/:id", async (req, res) => {
-    let result = await User.updateOne(
-        { _id: req.params.id },
-        {
-            $set: req.body
+    try {
+
+        try {
+            let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.params.id) });
+            let gfs = multer.gfs.grid
+            let filename = toDelete.IDcard
+
+            let temp = []
+            temp = filename.split("/")
+            console.log(temp)
+            let removingFile = temp[temp.length - 1]
+
+            try {
+                await gfs.files.deleteOne({ filename: removingFile })
+                console.log("Done")
+            } catch (error) {
+                console.log("Not Done")
+            }
+
+        } catch (error) {
+            console.log(error)
         }
-    )
-    res.send(result);
+
+
+        try {
+            let result = await User.updateOne(
+                { _id: req.params.id },
+                {
+                    $set: req.body
+                }
+            )
+            res.send(result);
+        } catch (error) {
+            console.log(error);
+            res.send(error);
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.send(error)
+    }
+
 })
 
 
@@ -234,31 +305,30 @@ router.post('/deleteuser', async (req, res) => {
     try {
         try {
             const result = await User.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-            console.log("Deleted",result)
+            console.log("Deleted", result)
             res.send(result);
         } catch (error) {
             console.log(error)
             res.send(error)
         }
-        
+
     } catch (error) {
         res.status(400).send("UNSUCCESSFUL")
     }
 })
 
 
-router.get('/generateotp_pass/:id',async(req,res)=>
-{
-    
-    const otp = otpGenerator.generate(6,{lowerCaseAlphabets:false,specialChars:false});
-    const user =  await User.findOne({email:req.params.id})
-    try{
-        let test =await User.updateOne({_id:user._id},{$set:{otp:otp}})
-        console.log(test);
-        pass_otp.sendOtp(otp,user.email);
+router.get('/generateotp_pass/:id', async (req, res) => {
 
-    res.send('generated');
-    }catch(err){
+    const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
+    const user = await User.findOne({ email: req.params.id })
+    try {
+        let test = await User.updateOne({ _id: user._id }, { $set: { otp: otp } })
+        console.log(test);
+        pass_otp.sendOtp(otp, user.email);
+
+        res.send('generated');
+    } catch (err) {
         console.log(err)
         res.send(err);
     }
@@ -266,45 +336,56 @@ router.get('/generateotp_pass/:id',async(req,res)=>
 })
 
 
-router.get('/verifyotp_pass/:id/:otp',async(req,res)=>{
+router.get('/verifyotp_pass/:id/:otp', async (req, res) => {
 
-    const user =  await User.findOne({email:req.params.id});
+    const user = await User.findOne({ email: req.params.id });
 
-    if(user.otp == req.params.otp)
-    {        
-        const u_otp = await User.updateOne({email:req.params.id},{$set:{otp:'verified'}});
+    if (user.otp == req.params.otp) {
+        const u_otp = await User.updateOne({ email: req.params.id }, { $set: { otp: 'verified' } });
         res.send('verified_otp');
         //res.redirect       
     }
-    else{
+    else {
         res.send('incorrect otp')
     }
 
 })
 
-router.get('/change_pass/:id/:newpassword',async(req,res)=>
-{
-    
-    const user =  await User.findOne({email:req.params.id});
-    const saltRounds =10;
-    if(user.otp == 'verified'){
-             
+router.get('/change_pass/:id/:newpassword', async (req, res) => {
+
+    const user = await User.findOne({ email: req.params.id });
+    const saltRounds = 10;
+    if (user.otp == 'verified') {
+
         bcrypt.hash(req.params.newpassword, saltRounds, async (err, hash) => {
-            if(err){
+            if (err) {
                 res.send(err)
             }
-            else{
-            const u_pass = await User.updateOne({email:req.params.id},{$set:{password:hash}});
-            console.log('u_pass');
-            console.log(hash)
-            res.send(hash)
+            else {
+                const u_pass = await User.updateOne({ email: req.params.id }, { $set: { password: hash } });
+                console.log(u_pass);
+                console.log(hash)
+                res.status(200).send(hash)
             }
         })
     }
-    else{
+    else {
         res.send('please verify otp first')
     }
-    
+
+})
+
+router.get('/allusers', async (req, res) => {
+    try {
+        let users = await User.find({ verified: 'yes' });
+        if (users.length > 0) {
+            res.send(users);
+        } else {
+            res.send({ result: "No users found" })
+        }
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 
