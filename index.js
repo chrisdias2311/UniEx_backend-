@@ -97,14 +97,14 @@ app.get('/', (req, resp)=>{
 })
 
 app.get("/api/user/register", (req, res)=> {
-    res.render("register")
+    res.render("register")  
 })
 
 app.get("/api/user/login", (req, res)=> {
     res.render("login")
 })
 
-
+app.use("/img",express.static('images'))
 
 app.listen(5000,()=>{
     console.log(`server is running on port 5000`);
