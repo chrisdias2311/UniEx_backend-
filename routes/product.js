@@ -172,8 +172,9 @@ router.post('/bookproduct', async (req, res) => {
             console.log("Error new trans: ", error)
         }
 
-
         try {
+
+            const buyer = await User.findOne({_id:mongoose.Types.ObjectId(req.body.buyerId)})
             let booked = await Product.updateOne(
                 { _id: mongoose.Types.ObjectId(req.body.id) },
                 {
@@ -183,7 +184,7 @@ router.post('/bookproduct', async (req, res) => {
                     }
                 }
             )
-            sendMail.sendBooked(product.productName,req.body.useremail)
+            sendMail.sendBooked(product.productName,buyer.email)
             console.log(booked)
             // res.status(200).send("Product deleted successfully!")
         } catch (error) {
