@@ -10,6 +10,7 @@ const passport = require('passport');
 const { application } = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('../middlewares/multer')
+const sendMail = require('../mailhandelling/book')
 
 const secretKey = "secretKey";
 
@@ -69,6 +70,8 @@ router.post('/myproducts', async (req, res) => {
         console.log(error)
     }
 })
+
+
 
 router.post('/bookedproducts', async (req, res) => {
     try {
@@ -180,6 +183,7 @@ router.post('/bookproduct', async (req, res) => {
                     }
                 }
             )
+            sendMail.sendBooked(product.productName,req.body.useremail)
             console.log(booked)
             // res.status(200).send("Product deleted successfully!")
         } catch (error) {
