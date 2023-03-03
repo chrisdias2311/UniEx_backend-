@@ -148,7 +148,7 @@ router.post('/bookproduct', async (req, res) => {
         try {
             const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
             const SellerName = await Seller;
-            
+
             let transDate = (new Date).toString()
             let slicedDate = transDate.substring(0, 24);
 
@@ -184,8 +184,8 @@ router.post('/bookproduct', async (req, res) => {
                     }
                 }
             )
-            let product = await Product.findOne({_id:mongoose.Types.ObjectId(req.body.id)})
-            sendMail.sendBooked(product.name,Seller.email)
+            let product = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) })
+            sendMail.sendBooked(product.name, Seller.email)
             console.log(booked)
             // res.status(200).send("Product deleted successfully!")
         } catch (error) {
@@ -214,12 +214,12 @@ router.post('/downloadproduct', async (req, res) => {
     try {
         const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
         const SellerName = await Seller;
-        console.log("SELLERNAME:", 
-        SellerName)
+        console.log("SELLERNAME:",
+            SellerName)
 
         let transDate = (new Date).toString()
         let slicedDate = transDate.substring(0, 24);
-        
+
 
 
         const newTransaction = new Transaction({
@@ -279,32 +279,65 @@ router.post('/updateproduct', async (req, res) => {
     }
 })
 
+// router.post('/deleteproduct', async (req, res) => {
+//     try {
+//         let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+//         let gfs = multer.gfs.grid
+//         let filename = toDelete.productImage
+
+//         let temp = []
+//         temp = filename.split("/")
+//         console.log(temp)
+//         let removingFile = temp[temp.length - 1]
+//         // user_icon_1662560350693undefined
+//         // console.log(removingFile);
+//         try {
+//             await gfs.files.deleteOne({ filename: removingFile })
+//             console.log("Done")
+//         } catch (error) {
+//             console.log("Not Done")
+//         }
+
+//         try {
+//             const result = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+//             console.log("Deleted",result)
+//             res.send(result);
+//         } catch (error) {
+//             console.log(error)
+//             res.send(error)
+//         }
+
+
+//     } catch (error) {
+//         res.status(400).send("UNSUCCESSFUL")
+//     }
+// })
+
+
 router.post('/deleteproduct', async (req, res) => {
     try {
         let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-        let gfs = multer.gfs.grid
-        let filename = toDelete.productImage
+        if (toDelete) {
 
-        let temp = []
-        temp = filename.split("/")
-        console.log(temp)
-        let removingFile = temp[temp.length - 1]
-        // user_icon_1662560350693undefined
-        // console.log(removingFile);
-        try {
-            await gfs.files.deleteOne({ filename: removingFile })
-            console.log("Done")
-        } catch (error) {
-            console.log("Not Done")
-        }
-
-        try {
-            const result = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-            console.log("Deleted",result)
-            res.send(result);
-        } catch (error) {
-            console.log(error)
-            res.send(error)
+            try {
+                mongoose.connection.once("open", async () => {
+                    gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+                        bucketName: "uploads",
+                    });
+                    try {
+                        const del = await gridfsBucket.delete(mongoose.Types.ObjectId(req.body.id));
+                        console.log(del);
+                    }
+                    catch (err) {
+                        console.log(err);
+                    }
+                })
+                console.log("Done")
+            } catch (error) {
+                console.log("Not Done")
+            }
+        } else {
+            console.log('the file doesnt exist');
         }
 
 

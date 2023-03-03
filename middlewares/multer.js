@@ -37,7 +37,7 @@ const storage = new GridFsStorage({
                 bucketName: 'uploads'
             };
             resolve(fileInfo);
-            
+
         });
     }
 });
@@ -102,5 +102,7 @@ router.get('/:filename', (req, res) => {
         }
     });
 });
+
+
 
 module.exports = { router, upload, gfs }
