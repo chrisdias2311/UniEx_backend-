@@ -324,22 +324,26 @@ router.post('/deleteproduct', async (req, res) => {
                     gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
                         bucketName: "uploads",
                     });
+
+                    const del = await gridfsBucket.delete(mongoose.Types.ObjectId(req.body.id));
                     try {
-                        const del = await gridfsBucket.delete(mongoose.Types.ObjectId(req.body.id));
-                        console.log(del);
+                        const filedel = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+                        //console.log(del);
                     }
                     catch (err) {
+                        console.log("removes lines 329-336 from code gridfs deletes everything")
                         console.log(err);
                     }
                 })
                 console.log("Done")
+                res.send('request has been processed');
+
             } catch (error) {
                 console.log("Not Done")
             }
         } else {
             console.log('the file doesnt exist');
         }
-
 
     } catch (error) {
         res.status(400).send("UNSUCCESSFUL")
