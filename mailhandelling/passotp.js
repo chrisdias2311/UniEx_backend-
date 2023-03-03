@@ -1,9 +1,9 @@
 const nodemailer =require('nodemailer')
-const fs = require('fs')
+//const fs = require('fs')
 const path = require('path')
 
 async function sendOtp(otp, email){
-    htmlfile = fs.readFileSync(path.resolve(__dirname,'./otpverif.html'))
+    //htmlfile = fs.readFileSync(path.resolve(__dirname,'./otpverif.html'))
     let transporter = nodemailer.createTransport(
         {
             host: "smtp.gmail.com",
@@ -25,8 +25,14 @@ async function sendOtp(otp, email){
             path: __dirname+'/Logo.jpeg',
             cid:'logo'
         },
-        html:htmlfile+'<code style="font-size:1.2em; background:#212121;padding:5px">'+otp+"</code></h1></div></body>"
-
+        html:`
+        <body style = "background-color: #212121;">
+            <center><img style="width:10em;"src="cid:logo"></center>
+            <div style="background-color: #262626;color:antiquewhite; ">
+            <h3 style="text-align: center;padding-top: 20px;">Use this verification code to reset your password.</h3>
+            <h1 style="padding-top: 100px;padding-bottom: 100px;text-align: center;" >Your otp is 
+        <code style="font-size:1.2em; background:#262626;padding:5px">${otp}</code></h1></div></body>
+        `
     })
     console.log("message has been sent: %s",info.messageId);
 
