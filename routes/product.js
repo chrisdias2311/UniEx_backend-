@@ -148,7 +148,7 @@ router.post('/bookproduct', async (req, res) => {
         try {
             const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
             const SellerName = await Seller;
-
+            
             let transDate = (new Date).toString()
             let slicedDate = transDate.substring(0, 24);
 
@@ -173,8 +173,8 @@ router.post('/bookproduct', async (req, res) => {
         }
 
         try {
-
-            const buyer = await User.findOne({_id:mongoose.Types.ObjectId(req.body.buyerId)})
+            const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
+            //const buyer = await User.findOne({_id:mongoose.Types.ObjectId(req.body.buyerId)})
             let booked = await Product.updateOne(
                 { _id: mongoose.Types.ObjectId(req.body.id) },
                 {
@@ -184,7 +184,8 @@ router.post('/bookproduct', async (req, res) => {
                     }
                 }
             )
-            sendMail.sendBooked(product.productName,buyer.email)
+            let product = await Product.findOne({_id:mongoose.Types.ObjectId(req.body.id)})
+            sendMail.sendBooked(product.name,Seller.email)
             console.log(booked)
             // res.status(200).send("Product deleted successfully!")
         } catch (error) {
