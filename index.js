@@ -7,6 +7,7 @@ const passport = require("passport");
 const { initializingPassport } = require('./middlewares/passportConfig');
 const expressSession = require('express-session')
 const jwt = require("jsonwebtoken")
+const http = require('http');
 
 
 
@@ -56,38 +57,6 @@ app.use('/api/transactions', require('./routes/transactions'))
 
 
 
-// const Storage = multer.diskStorage({
-//     destination:'uploads',
-//     filename:(req,file,cb)=>{
-//         cb(null, file.originalname)
-//     }
-// })
-
-// const upload = multer({
-//     storage:Storage
-// }).single('testImage')
-
-// app.post('/upload', (req, res)=>{
-//     console.log('This is image body', req.body)
-//     upload(req, res, (err)=>{
-//         if(err){
-//             console.log(err);
-//         }else{
-//             const newImage = new ImageModel({
-//                 name: req.body.name,
-//                 image:{
-//                     data: req.file.filename,
-//                     contentType:'image/png'
-//                 }
-//             })
-//             newImage.save()
-//             .then(()=>res.send("successfully uploaded"))
-//             .catch((err)=> console.log(err));
-//         }
-//     })
-// })
-
-
 
 
 
@@ -105,6 +74,8 @@ app.get("/api/user/login", (req, res)=> {
 })
 
 app.use("/img",express.static('images'))
+
+const server = require('http')
 
 app.listen(5000,()=>{
     console.log(`server is running on port 5000`);

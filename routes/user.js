@@ -12,7 +12,7 @@ const mongoose = require('mongoose')
 const pass_otp = require('../mailhandelling/passotp')
 const secretKey = "secretKey";
 
-const URL = `localhost:5000`
+const URL = `https://uniexserver.onrender.com`
 
 
 

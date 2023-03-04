@@ -14,7 +14,7 @@ const sendMail = require('../mailhandelling/book')
 
 const secretKey = "secretKey";
 
-const URL = `localhost:5000`
+const URL = `https://uniexserver.onrender.com`
 
 
 
