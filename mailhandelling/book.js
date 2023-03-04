@@ -9,15 +9,15 @@ async function sendBooked(product_name, email) {
             port: 587,
             secure: false,
             auth: {
-                user: "jasonsampy88@gmail.com", //add acc
-                pass: "lsuhlqxqogwerbdq"//change
+                user: "uniexsfit@gmail.com", //add acc
+                pass: "fwrdsquycvfufiuo"//change
             }
         }
     );
 
 
     let info = await transporter.sendMail({
-        from: 'UniEx <jasonsampy88@gmail.com>',
+        from: 'UniEx <uniexsfit@gmail.com>',
         to: email,
         subject: "Product Booked",
         attachments: {
