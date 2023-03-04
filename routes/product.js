@@ -258,7 +258,7 @@ router.post('/bookproduct', async (req, res) => {
             const SellerName = await Seller;
 
             let transDate = (new Date).toString()
-            let slicedDate = transDate.substring(0, 24);
+            let slicedDate = transDate.substring(0, 16);
 
 
 
@@ -362,7 +362,7 @@ router.post('/downloadproduct', async (req, res) => {
             SellerName)
 
         let transDate = (new Date).toString()
-        let slicedDate = transDate.substring(0, 24);
+        let slicedDate = transDate.substring(0, 16);
 
 
 

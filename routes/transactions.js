@@ -13,7 +13,7 @@ const multer = require('../middlewares/multer')
 
 const secretKey = "secretKey";
 
-const URL = `localhost:5000`
+const URL = `https://uniexserver.onrender.com`
 
 
 
