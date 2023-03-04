@@ -289,17 +289,8 @@ router.post('/bookproduct', async (req, res) => {
             console.log(booked)
             // res.status(200).send("Product deleted successfully!")
         } catch (error) {
-            consoler.log("Error: ", error)
+            console.log("Error: ", error)
         }
-
-
-        // try {
-        //     const result = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) })
-        //     res.send(result)
-        // } catch (error) {
-        //     console.log("Product deletion error: ", error)
-        // }
-
 
 
     } catch (error) {

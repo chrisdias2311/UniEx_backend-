@@ -23,47 +23,54 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
     const saltRounds = 10;
     try {
         const user = await User.findOne({ email: req.body.email })
-        if (user) return res.status(400).send("Account already exists");
-        console.log("This is REQ FILE =", req.file);
-        //bcrypt encryption
-        bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
-            console.log(hash);
-            if (err) {
-                res.send('error generating hash')
-            }
-            else {
-                const newUser = new User({
-                    pid: req.body.pid,
-                    email: req.body.email,
-                    firstname: req.body.firstname,
-                    lastname: req.body.lastname,
-                    phone: req.body.phone,
-                    year: req.body.year,
-                    dept: req.body.dept,
-                    class: req.body.class,
-                    password: hash,
-                    IDcard: `${URL}/api/image/${req.file.filename}`,
-                    validity: 'No', //Default validity of user is no 
-                    verified: 'No',
-                    otp: "null"
-                });
-                const saved = await newUser.save((err, user) => {
-                    if (err) {
-                        console.log(err);
-                        res.send(400, 'bad request');
-                    }
 
-                    else {
-                        res.send(user)
-                    }
-                });
-                // if (saved){
+        if (user) {
+            console.log(user)
+            res.status(400).send("Account already exists");
+            return
+        } else {
 
-                //     send_data = await User.findOne({ email:req.body.email },{password:0});
-                //     res.send(send_data)
-                // }
-            }
-        })
+            console.log("This is REQ FILE =", req.file);
+            //bcrypt encryption
+            bcrypt.hash(req.body.password, saltRounds, async (err, hash) => {
+                console.log(hash);
+                if (err) {
+                    res.send('error generating hash')
+                }
+                else {
+                    const newUser = new User({
+                        pid: req.body.pid,
+                        email: req.body.email,
+                        firstname: req.body.firstname,
+                        lastname: req.body.lastname,
+                        phone: req.body.phone,
+                        year: req.body.year,
+                        dept: req.body.dept,
+                        class: req.body.class,
+                        password: hash,
+                        IDcard: `${URL}/api/image/${req.file.filename}`,
+                        validity: 'No', //Default validity of user is no 
+                        verified: 'No',
+                        otp: "null"
+                    });
+                    const saved = await newUser.save((err, user) => {
+                        if (err) {
+                            console.log(err);
+                            res.send(400, 'bad request');
+                        }
+
+                        else {
+                            res.send(user)
+                        }
+                    });
+                    // if (saved){
+
+                    //     send_data = await User.findOne({ email:req.body.email },{password:0});
+                    //     res.send(send_data)
+                    // }
+                }
+            })
+        }
         //const saved = await newUser.save();
         // res.send(newUser);
         //res.send(newUser)
@@ -71,6 +78,7 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
         console.log(error);
         res.send(error)
     }
+
 })
 
 
@@ -148,31 +156,40 @@ router.post('/getuser', async (req, res) => {
 })
 
 router.put("/validateuser/:id", async (req, res) => {
-
-
     try {
-
+        let gridfsBucket;
+        let removingFile;
         try {
             let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.params.id) });
-            let gfs = multer.gfs.grid
-            let filename = toDelete.IDcard
+            console.log("To Delete ", toDelete)
+
+            let filename = toDelete.IDcard;
 
             let temp = []
             temp = filename.split("/")
             console.log(temp)
-            let removingFile = temp[temp.length - 1]
+            removingFile = temp[temp.length - 1]
+            console.log(removingFile);
 
-            try {
-                await gfs.files.deleteOne({ filename: removingFile })
-                console.log("Done")
-            } catch (error) {
-                console.log("Not Done")
-            }
-
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            console.log(err)
         }
 
+
+        try {
+            gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+                bucketName: "uploads",
+            });
+
+            const img = await gridfsBucket.find({ filename: removingFile }).toArray();
+            img.map(async (doc) => {
+                const del = await gridfsBucket.delete(doc._id)
+                console.log(del)
+            })
+
+        } catch (error) {
+            console.log("Not Done")
+        }
 
         try {
             let result = await User.updateOne(
@@ -195,28 +212,39 @@ router.put("/validateuser/:id", async (req, res) => {
 
 router.put("/declineuser/:id", async (req, res) => {
     try {
-
+        let gridfsBucket;
+        let removingFile;
         try {
             let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.params.id) });
-            let gfs = multer.gfs.grid
-            let filename = toDelete.IDcard
+            console.log("To Delete ", toDelete)
+
+            let filename = toDelete.IDcard;
 
             let temp = []
             temp = filename.split("/")
             console.log(temp)
-            let removingFile = temp[temp.length - 1]
+            removingFile = temp[temp.length - 1]
+            console.log(removingFile);
 
-            try {
-                await gfs.files.deleteOne({ filename: removingFile })
-                console.log("Done")
-            } catch (error) {
-                console.log("Not Done")
-            }
-
-        } catch (error) {
-            console.log(error)
+        } catch (err) {
+            console.log(err)
         }
 
+
+        try {
+            gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+                bucketName: "uploads",
+            });
+
+            const img = await gridfsBucket.find({ filename: removingFile }).toArray();
+            img.map(async (doc) => {
+                const del = await gridfsBucket.delete(doc._id)
+                console.log(del)
+            })
+
+        } catch (error) {
+            console.log("Not Done")
+        }
 
         try {
             let result = await User.updateOne(
@@ -303,6 +331,41 @@ router.post('/updateuser', async (req, res) => {
 
 router.post('/deleteuser', async (req, res) => {
     try {
+        let gridfsBucket;
+        let removingFile;
+        try {
+            let toDelete = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+            console.log("To Delete ", toDelete)
+
+            let filename = toDelete.IDcard;
+
+            let temp = []
+            temp = filename.split("/")
+            console.log(temp)
+            removingFile = temp[temp.length - 1]
+            console.log(removingFile);
+
+        } catch (err) {
+            console.log(err)
+        }
+
+        try {
+            gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+                bucketName: "uploads",
+            });
+
+            const img = await gridfsBucket.find({ filename: removingFile }).toArray();
+            img.map(async (doc) => {
+                const del = await gridfsBucket.delete(doc._id)
+                console.log(del)
+            })
+
+        } catch (error) {
+            console.log("Not Done")
+        }
+
+
+
         try {
             const result = await User.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
             console.log("Deleted", result)

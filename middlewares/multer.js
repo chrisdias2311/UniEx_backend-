@@ -10,6 +10,9 @@ const mongoose = require("mongoose");
 const gfs = { grid: undefined }
 let gridfsBucket;
 
+const dev = `mongodb+srv://uniexadmins:UniEXCOOL987654@serverlessinstance0.8jjmz.mongodb.net/dev?retryWrites=true&w=majority`;
+const production = `mongodb+srv://uniexadmins:UniEXCOOL987654@serverlessinstance0.8jjmz.mongodb.net/production?retryWrites=true&w=majority`;
+
 // Make the bucket in GFS
 mongoose.connection.once("open", () => {
     gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
@@ -27,7 +30,7 @@ mongoose.connection.once("open", () => {
 
 // Store the files in the bucket 
 const storage = new GridFsStorage({
-    url: `mongodb+srv://chrisdias2311:uniExmembers2311@serverlessinstance0.a8eqn.mongodb.net/?retryWrites=true&w=majority`,
+    url: dev,
     file: (req, file) => {
         return new Promise((resolve, reject) => {
 
