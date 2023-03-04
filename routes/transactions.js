@@ -21,6 +21,7 @@ router.post('/soldproducts', async (req, res) => {
     try {
         let transactions = await Transaction.find({ soldBy: req.body.id });
         if (transactions.length > 0) {
+            transactions.reverse()
             res.send(transactions);
         } else {
             res.send({ result: "No transactions found" })
@@ -34,6 +35,7 @@ router.post('/mytransactions', async (req, res) => {
     try {
         let transactions = await Transaction.find({ broughtBy: req.body.id });
         if (transactions.length > 0) {
+            transactions.reverse()
             res.send(transactions);
         } else {
             res.send({ result: "No transactions found" })
