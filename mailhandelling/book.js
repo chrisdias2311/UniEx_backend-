@@ -32,8 +32,8 @@ async function sendBooked(product_name, email) {
             <body style = "background-color: #212121;">
             <center><img style="width:10em;" src="cid:logo"></center>
             <div style="background-color: #262626;color:antiquewhite; ">
-                <h2 style="text-align: center;padding-top: 20px;">You have successfully booked the product</h2>
-                <h1 style="padding-top: 20px;padding-bottom: 50px;text-align: center;" >the product you have booked is ${product_name} </h1></div></body>
+                <h1 style="text-align: center;padding-top: 20px;">Your ${product_name} was successfully booked!</h1>
+                <h2 style="padding-top: 20px;padding-bottom: 50px;text-align: center;" >Check your UniEx dashboard for further details. Thanks for choosing UniEx! </h2></div></body>
             `
     })
     console.log("message has been sent: %s", info.messageId);

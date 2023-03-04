@@ -177,15 +177,15 @@ router.post('/bookedproducts', async (req, res) => {
 //         try {
 //             const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
 //             //const buyer = await User.findOne({_id:mongoose.Types.ObjectId(req.body.buyerId)})
-//             let booked = await Product.updateOne(
-//                 { _id: mongoose.Types.ObjectId(req.body.id) },
-//                 {
-//                     $set: {
-//                         bookingStatus: 'booked',
-//                         bookedBy: req.body.buyerId
-//                     }
-//                 }
-//             )
+            // let booked = await Product.updateOne(
+            //     { _id: mongoose.Types.ObjectId(req.body.id) },
+            //     {
+            //         $set: {
+            //             bookingStatus: 'booked',
+            //             bookedBy: req.body.buyerId
+            //         }
+            //     }
+            // )
 //             let product = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) })
 //             sendMail.sendBooked(product.name, Seller.email)
 //             console.log(booked)
@@ -235,8 +235,16 @@ router.post('/bookproduct', async (req, res) => {
                 const del = await gridfsBucket.delete(doc._id)
                 console.log(del)
             })
-            let deleted = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-            console.log("Deleted")
+            
+            let booked = await Product.updateOne(
+                { _id: mongoose.Types.ObjectId(req.body.id) },
+                {
+                    $set: {
+                        bookingStatus: 'booked',
+                        bookedBy: req.body.buyerId
+                    }
+                }
+            )
             //res.send('request has been processed');
 
         } catch (error) {
@@ -366,7 +374,7 @@ router.post('/downloadproduct', async (req, res) => {
             sellerName: SellerName.firstname,
             buyerName: req.body.buyerName,
             date: slicedDate,
-            transactionType: 'downloaded'
+            transactionType: 'tried to access'
         })
         const saved = await newTransaction.save();
         res.send(saved);

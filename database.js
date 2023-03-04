@@ -10,7 +10,7 @@ const production = `mongodb+srv://uniexadmins:UniEXCOOL987654@serverlessinstance
 
 const connectDB = async () => {
     try{
-        const conn = await mongoose.connect(production, {
+        const conn = await mongoose.connect(dev, {
             useUnifiedTopology: true,
             useNewUrlParser: true,
         });
