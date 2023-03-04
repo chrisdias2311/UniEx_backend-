@@ -214,46 +214,144 @@ router.post('/bookedproducts', async (req, res) => {
 router.post('/bookproduct', async (req, res) => {
     try {
         let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-        if (toDelete) {
+        // let gfs = multer.gfs.grid
+        let filename = toDelete.productImage
 
-            let filename = toDelete.filename;
-            let temp = []
-            temp = filename.split("/")
-            console.log(temp)
-            let removingFile = temp[temp.length - 1]
-            try {
-                mongoose.connection.once("open", async () => {
-                    gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
-                        bucketName: "uploads",
-                    });
+        let temp = []
+        temp = filename.split("/")
+        console.log(temp)
+        let removingFile = temp[temp.length - 1]
+        // user_icon_1662560350693undefined
+        // console.log(removingFile);
+        let gridfsBucket;
+        console.log(removingFile)
+        try {
+            gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+                bucketName: "uploads",
+            });
 
-                    const img = await gridfsBucket.findOne({ filename: removingFile })
+            const img = await gridfsBucket.find({ filename: removingFile }).toArray();
+            img.map(async (doc) => {
+                const del = await gridfsBucket.delete(doc._id)
+                console.log(del)
+            })
+            let deleted = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+            console.log("Deleted")
+            //res.send('request has been processed');
 
-                    const del = await gridfsBucket.delete(img._id);
-                    try {
-                        const filedel = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-                        console.log("File del done")
-                        //console.log(del);
-                    }
-                    catch (err) {
-                        console.log("removes lines 329-336 from code gridfs deletes everything")
-                        console.log(err);
-                    }
-                })
-                console.log("Done")
-                res.send('request has been processed');
-
-            } catch (error) {
-                console.log("Not Done")
-            }
-        } else {
-            console.log('the file doesnt exist');
+        } catch (error) {
+            console.log("Not deleted")
         }
 
+
+
+        try {
+            const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
+            const SellerName = await Seller;
+
+            let transDate = (new Date).toString()
+            let slicedDate = transDate.substring(0, 24);
+
+
+
+            const newTransaction = new Transaction({
+                productId: req.body.id,
+                productName: req.body.productName,
+                soldBy: req.body.sellerId,
+                broughtBy: req.body.buyerId,
+                sellerName: SellerName.firstname,
+                buyerName: req.body.buyerName,
+                date: slicedDate,
+                transactionType: 'booked'
+            })
+
+            const saved = await newTransaction.save();
+            res.send(saved);
+            console.log("Saved: ", saved);
+        } catch (error) {
+            console.log("Error new trans: ", error)
+        }
+
+        try {
+            const Seller = await User.findOne({ _id: mongoose.Types.ObjectId(req.body.sellerId) })
+            //const buyer = await User.findOne({_id:mongoose.Types.ObjectId(req.body.buyerId)})
+            let booked = await Product.updateOne(
+                { _id: mongoose.Types.ObjectId(req.body.id) },
+                {
+                    $set: {
+                        bookingStatus: 'booked',
+                        bookedBy: req.body.buyerId
+                    }
+                }
+            )
+            let product = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) })
+            sendMail.sendBooked(product.name, Seller.email)
+            console.log(booked)
+            // res.status(200).send("Product deleted successfully!")
+        } catch (error) {
+            consoler.log("Error: ", error)
+        }
+
+
+        // try {
+        //     const result = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) })
+        //     res.send(result)
+        // } catch (error) {
+        //     console.log("Product deletion error: ", error)
+        // }
+
+
+
     } catch (error) {
+        console.log("The error: ", error)
         res.status(400).send("UNSUCCESSFUL")
     }
 })
+
+
+// router.post('/bookproduct', async (req, res) => {
+//     try {
+//         let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+//         if (toDelete) {
+
+//             let filename = toDelete.filename;
+//             let temp = []
+//             temp = filename.split("/")
+//             console.log(temp)
+//             let removingFile = temp[temp.length - 1]
+//             try {
+//                 mongoose.connection.once("open", async () => {
+//                     gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+//                         bucketName: "uploads",
+//                     });
+
+//                     const img = await gridfsBucket.findOne({filename:removingFile})
+
+//                     const del = await gridfsBucket.delete(img._id);
+//                     try {
+//                         const filedel = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+//                         console.log("File del done")
+//                         //console.log(del);
+//                     }
+//                     catch (err) {
+//                         console.log("removes lines 329-336 from code gridfs deletes everything")
+//                         console.log(err);
+//                     }
+//                 })
+//                 console.log("Done")
+//                 res.send('request has been processed');
+
+//             } catch (error) {
+//                 console.log("Not Done")
+//             }
+//         } else {
+//             console.log('the file doesnt exist');
+//         }
+
+//     } catch (error) {
+//         res.status(400).send("UNSUCCESSFUL")
+//     }
+// })
 
 
 router.post('/downloadproduct', async (req, res) => {
@@ -362,41 +460,43 @@ router.post('/updateproduct', async (req, res) => {
 
 
 router.post('/deleteproduct', async (req, res) => {
+    let gridfsBucket;
+    let removingFile;
     try {
         let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-        if (toDelete) {
 
-            try {
-                mongoose.connection.once("open", async () => {
-                    console.log("Entered connectionblock")
-                    gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
-                        bucketName: "uploads",
-                    });
+        let filename = toDelete.productImage;
 
-                    const del = await gridfsBucket.delete(mongoose.Types.ObjectId(req.body.id));
-                    console.log(del, "Deletion")
-                    try {
-                        const filedel = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
-                        //console.log(del);
-                    }
-                    catch (err) {
-                        console.log("removes lines 329-336 from code gridfs deletes everything")
-                        console.log(err);
-                    }
-                })
-                console.log("Done")
-                res.send('request has been processed');
+        let temp = []
+        temp = filename.split("/")
+        console.log(temp)
+        removingFile = temp[temp.length - 1]
+        console.log(removingFile);
 
-            } catch (error) {
-                console.log("Not Done")
-            }
-        } else {
-            console.log('the file doesnt exist');
-        }
+    } catch (err) {
+        console.log(err)
+    }
+    try {
+        gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
+            bucketName: "uploads",
+        });
+
+        const img = await gridfsBucket.find({ filename: removingFile }).toArray();
+        img.map(async (doc) => {
+            const del = await gridfsBucket.delete(doc._id)
+            console.log(del)
+        })
+        try {
+            let deleted = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
+        } catch (err) {
+            console.log(err)
+        } console.log("Done")
+        res.send('request has been processed');
 
     } catch (error) {
-        res.status(400).send("UNSUCCESSFUL")
+        console.log("Not Done")
     }
+
 })
 
 
