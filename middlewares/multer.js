@@ -30,7 +30,7 @@ mongoose.connection.once("open", () => {
 
 // Store the files in the bucket 
 const storage = new GridFsStorage({
-    url: dev,
+    url: production,
     file: (req, file) => {
         return new Promise((resolve, reject) => {
 
