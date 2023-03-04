@@ -216,13 +216,20 @@ router.post('/bookproduct', async (req, res) => {
         let toDelete = await Product.findOne({ _id: mongoose.Types.ObjectId(req.body.id) });
         if (toDelete) {
 
+            let filename = toDelete.filename;
+            let temp = []
+            temp = filename.split("/")
+            console.log(temp)
+            let removingFile = temp[temp.length - 1]
             try {
                 mongoose.connection.once("open", async () => {
                     gridfsBucket = new mongoose.mongo.GridFSBucket(mongoose.connections[0].db, {
                         bucketName: "uploads",
                     });
 
-                    const del = await gridfsBucket.delete(mongoose.Types.ObjectId(req.body.id));
+                    const img = await gridfsBucket.findOne({ filename: removingFile })
+
+                    const del = await gridfsBucket.delete(img._id);
                     try {
                         const filedel = await Product.deleteOne({ _id: mongoose.Types.ObjectId(req.body.id) });
                         console.log("File del done")
