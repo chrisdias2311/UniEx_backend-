@@ -1,8 +1,8 @@
 # UniEx_backend-
-minor changes:-
-transaction complete button (delete booked product only after transaction is complete)
-minor changes for errors (design related)
-file size limit for image uploads
+##minor changes:-
+###transaction complete button (delete booked product only after transaction is complete)
+###minor changes for errors (design related)
+###file size limit for image uploads
 
 fixes:
 error for invalid credentials on login
