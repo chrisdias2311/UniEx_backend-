@@ -19,10 +19,11 @@ const URL = `localhost:5000`
 
 //Rigister (alternative to Signup)
 router.post("/register", multer.upload.single("file"), async (req, res) => {
-
+    const email_ID = (req.body.email).toLowerCase();
+    console.log(email_ID)
     const saltRounds = 10;
     try {
-        const user = await User.findOne({ email: req.body.email })
+        const user = await User.findOne({ email: email_ID })
 
         if (user) {
             console.log(user)
@@ -40,7 +41,7 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
                 else {
                     const newUser = new User({
                         pid: req.body.pid,
-                        email: req.body.email,
+                        email: email_ID,
                         firstname: req.body.firstname,
                         lastname: req.body.lastname,
                         phone: req.body.phone,
@@ -100,9 +101,11 @@ router.post("/register", multer.upload.single("file"), async (req, res) => {
 // })
 
 router.post("/login", async (req, res) => {
+
+    const email_ID = (req.body.email).toLowerCase();
     try {
         console.log("The request:", req.body)
-        let user = await User.findOne({ email: req.body.email });
+        let user = await User.findOne({ email: email_ID });
 
         console.log(user);
         if (user) {
@@ -144,7 +147,7 @@ router.get('/invalidusers', async (req, res) => {
 
 router.post('/getuser', async (req, res) => {
     try {
-        let user = await User.findOne({ email: req.body.verifyEmail })
+        let user = await User.findOne({ email: (req.body.verifyEmail).toLowerCase() })
         if (user) {
             res.send(user)
         } else {
@@ -269,8 +272,9 @@ router.put("/declineuser/:id", async (req, res) => {
 
 router.get('/generateotp/:id', async (req, res) => {
 
+    const email_ID = (req.params.id).toLowerCase();
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
-    const user = await User.findOne({ email: req.params.id })
+    const user = await User.findOne({ email: email_ID })
     if (user.validity == 'yes') {
         res.send("already verified")
     }
@@ -290,7 +294,8 @@ router.get('/generateotp/:id', async (req, res) => {
 
 router.get('/verifyotp/:id/:otp', async (req, res) => {
 
-    const user = await User.findOne({ email: req.params.id });
+    const email_ID = (req.params.id).toLowerCase();
+    const user = await User.findOne({ email: email_ID });
     console.log(user);
 
     if (user.verified == 'yes') {
@@ -299,7 +304,7 @@ router.get('/verifyotp/:id/:otp', async (req, res) => {
     else {
         if (user.verified == req.params.otp) {
             console.log('passed')
-            const update = await User.updateOne({ email: req.params.id }, { $set: { verified: 'yes' } })
+            const update = await User.updateOne({ email: email_ID }, { $set: { verified: 'yes' } })
             console.log("verified");
             res.send(update);
 
@@ -384,6 +389,7 @@ router.post('/deleteuser', async (req, res) => {
 router.get('/generateotp_pass/:id', async (req, res) => {
 
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
+
     const user = await User.findOne({ email: req.params.id })
     try {
         let test = await User.updateOne({ _id: user._id }, { $set: { otp: otp } })
