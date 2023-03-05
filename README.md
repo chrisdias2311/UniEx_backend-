@@ -1,6 +1,6 @@
 # Updates to be made 
 ## minor changes:-
-- transaction complete button (delete booked product only after transaction is complete)
+- [] transaction complete button (delete booked product only after transaction is complete)
 - minor changes for errors (design related)
 - file size limit for image uploads
 
