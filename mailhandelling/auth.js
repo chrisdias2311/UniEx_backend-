@@ -5,18 +5,21 @@ async function sendOtp(otp, email) {
     //htmlfile = fs.readFileSync(path.resolve(__dirname,'./emailverif.html'))
     let transporter = nodemailer.createTransport(
         {
+
             host: "smtp.gmail.com",
             port: 587,
             secure: false,
             auth: {
-                user: "uniexsfit@gmail.com", //add acc
-                pass: "fwrdsquycvfufiuo"//change
+                user: "jasonsampy88@gmail.com", //add acc
+                pass: "pohdsrsqvrvohkzv"//change
             }
         }
     );
+
+
     try {
         let info = await transporter.sendMail({
-            from: 'UniEx <uniexsfit@gmail.com>',
+            from: 'UniEx <jasonsampy88@gmail.com>',
             to: email,
             subject: "OTP verification",
             text: "Your otp is " + otp + "do not reply",
