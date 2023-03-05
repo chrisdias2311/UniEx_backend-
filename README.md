@@ -16,6 +16,7 @@
 - [ ] downloads manager for the website (a personal file system to manage enotes/ study material / previous papers)
 - [ ] *providing direct download and direct viewing of uploaded data
 - [ ] website monitoring (image monitoring)
+- [ ] algorithm for e notes based on class and branch
 
 ## future changes:
 - [ ] tokenization for sessions 
