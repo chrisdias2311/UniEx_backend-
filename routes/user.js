@@ -271,9 +271,8 @@ router.get('/generateotp/:id', async (req, res) => {
 
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
     const user = await User.findOne({ email: req.params.id })
-    console.log(user.validity)
 
-    if (user.validity == 'yes') {
+    if (user.verified == 'yes') {
         res.send("already verified")
     }
     else {
