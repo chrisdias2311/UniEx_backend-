@@ -389,7 +389,7 @@ router.get('/generateotp_pass/:id', async (req, res) => {
     const user = await User.findOne({ email: req.params.id })
     if(user){
         try {
-            let test = await User.updateOne({ _id: user._id }, { $set: { otp: otp } })
+            let test = await User.updateOne({ _id:  mongoose.Types.ObjectId(user._id) }, { $set: { otp: otp } })
             console.log(test);
             pass_otp.sendOtp(otp, user.email);
     
@@ -409,13 +409,17 @@ router.get('/verifyotp_pass/:id/:otp', async (req, res) => {
 
     const user = await User.findOne({ email: req.params.id });
 
-    if (user.otp === req.params.otp) {
-        const u_otp = await User.updateOne({ email: req.params.id }, { $set: { otp: 'verified' } });
-        res.send('verified_otp');
-        //res.redirect       
-    }
-    else {
-        res.send('incorrect otp')
+    if(user){
+        if (user.otp === req.params.otp) {
+            const u_otp = await User.updateOne({ email: req.params.id }, { $set: { otp: 'verified' } });
+            res.send('verified_otp');
+            //res.redirect       
+        }
+        else {
+            res.send('incorrect otp')
+        }
+    }else{
+        res.status(400).send("User NBot found")
     }
 
 })
@@ -424,23 +428,28 @@ router.get('/change_pass/:id/:newpassword', async (req, res) => {
 
     const user = await User.findOne({ email: req.params.id });
     const saltRounds = 10;
-    if (user.otp === 'verified') {
+    if(user){
+        if (user.otp === 'verified') {
 
-        bcrypt.hash(req.params.newpassword, saltRounds, async (err, hash) => {
-            if (err) {
-                res.send(err)
-            }
-            else {
-                const u_pass = await User.updateOne({ email: req.params.id }, { $set: { password: hash } });
-                console.log(u_pass);
-                console.log(hash)
-                res.status(200).send(hash)
-            }
-        })
+            bcrypt.hash(req.params.newpassword, saltRounds, async (err, hash) => {
+                if (err) {
+                    res.send(err)
+                }
+                else {
+                    const u_pass = await User.updateOne({ email: req.params.id }, { $set: { password: hash } });
+                    console.log(u_pass);
+                    console.log(hash)
+                    res.status(200).send(hash)
+                }
+            })
+        }
+        else {
+            res.send('please verify otp first')
+        }
+    }else{
+        res.status(400).send("User not found")
     }
-    else {
-        res.send('please verify otp first')
-    }
+   
 
 })
 
