@@ -277,7 +277,8 @@ router.get('/generateotp/:id', async (req, res) => {
     }
     else {
         try {
-            let test = await User.updateOne({ _id: user._id }, { $set: { verified: otp } })
+        res.send('No user found');
+            let test = await User.updateOne({ _id:  mongoose.Types.ObjectId(user._id) }, { $set: { verified: otp } })
             console.log(test);
             auth.sendOtp(otp, user.email);
             console.log(user.email)
@@ -386,17 +387,21 @@ router.get('/generateotp_pass/:id', async (req, res) => {
 
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
     const user = await User.findOne({ email: req.params.id })
-    try {
-        let test = await User.updateOne({ _id: user._id }, { $set: { otp: otp } })
-        console.log(test);
-        pass_otp.sendOtp(otp, user.email);
-
-        res.send('generated');
-    } catch (err) {
-        console.log(err)
-        res.send(err);
+    if(user){
+        try {
+            let test = await User.updateOne({ _id: user._id }, { $set: { otp: otp } })
+            console.log(test);
+            pass_otp.sendOtp(otp, user.email);
+    
+            res.send('generated');
+        } catch (err) {
+            console.log(err)
+            res.send(err);
+        }
+    }else{
+        res.send('No user found');
+        console.log('No user found')
     }
-
 })
 
 
