@@ -272,7 +272,7 @@ router.get('/generateotp/:id', async (req, res) => {
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
     const user = await User.findOne({ email: req.params.id })
 
-    if (user.verified == 'yes') {
+    if (user.verified === 'yes') {
         res.send("already verified")
     }
     else {
@@ -295,7 +295,7 @@ router.get('/verifyotp/:id/:otp', async (req, res) => {
     const user = await User.findOne({ email: req.params.id });
     console.log(user);
 
-    if (user.verified == 'yes') {
+    if (user.verified === 'yes') {
         res.send("already verified")
     }
     else {
@@ -409,7 +409,7 @@ router.get('/verifyotp_pass/:id/:otp', async (req, res) => {
 
     const user = await User.findOne({ email: req.params.id });
 
-    if (user.otp == req.params.otp) {
+    if (user.otp === req.params.otp) {
         const u_otp = await User.updateOne({ email: req.params.id }, { $set: { otp: 'verified' } });
         res.send('verified_otp');
         //res.redirect       
@@ -424,7 +424,7 @@ router.get('/change_pass/:id/:newpassword', async (req, res) => {
 
     const user = await User.findOne({ email: req.params.id });
     const saltRounds = 10;
-    if (user.otp == 'verified') {
+    if (user.otp === 'verified') {
 
         bcrypt.hash(req.params.newpassword, saltRounds, async (err, hash) => {
             if (err) {
