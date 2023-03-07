@@ -272,24 +272,23 @@ router.get('/generateotp/:id', async (req, res) => {
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
     const user = await User.findOne({ email: req.params.id })
 
-    if(user){
+    if (user) {
         if (user.verified === 'yes') {
             res.send("already verified")
         }
         else {
             try {
-            res.send('No user found');
-                let test = await User.updateOne({ _id:  mongoose.Types.ObjectId(user._id) }, { $set: { verified: otp } })
+                let test = await User.updateOne({ _id: mongoose.Types.ObjectId(user._id) }, { $set: { verified: otp } })
                 console.log(test);
                 auth.sendOtp(otp, user.email);
                 console.log(user.email)
-                res.send('generated');
+                res.status(200).send('generated');
             } catch (err) {
                 console.log(err)
-                res.send(err);
+                res.status(400).send(err);
             }
         }
-    }else{
+    } else {
         res.status(400).send("No user found")
     }
 })
@@ -299,7 +298,7 @@ router.get('/verifyotp/:id/:otp', async (req, res) => {
     const user = await User.findOne({ email: req.params.id });
     console.log(user);
 
-    if(user){
+    if (user) {
         if (user.verified === 'yes') {
             res.send("already verified")
         }
@@ -309,14 +308,14 @@ router.get('/verifyotp/:id/:otp', async (req, res) => {
                 const update = await User.updateOne({ email: req.params.id }, { $set: { verified: 'yes' } })
                 console.log("verified");
                 res.send(update);
-    
+
             }
         }
-    }else{
+    } else {
         res.status(400).send("No user found")
     }
 
-    
+
 
 })
 
@@ -398,18 +397,18 @@ router.get('/generateotp_pass/:id', async (req, res) => {
     const otp = otpGenerator.generate(6, { lowerCaseAlphabets: false, specialChars: false });
     const user = await User.findOne({ email: req.params.id })
     console.log("This is request id", req.params.id)
-    if(user){
+    if (user) {
         try {
-            let test = await User.updateOne({ _id:  mongoose.Types.ObjectId(user._id) }, { $set: { otp: otp } })
+            let test = await User.updateOne({ _id: mongoose.Types.ObjectId(user._id) }, { $set: { otp: otp } })
             console.log(test);
             pass_otp.sendOtp(otp, user.email);
-    
+
             res.status(200).send('generated');
         } catch (err) {
             console.log(err)
             res.status(400).send(err);
         }
-    }else{
+    } else {
         res.status(400).send('No user found');
         console.log('No user found')
     }
@@ -420,7 +419,7 @@ router.get('/verifyotp_pass/:id/:otp', async (req, res) => {
 
     const user = await User.findOne({ email: req.params.id });
 
-    if(user){
+    if (user) {
         if (user.otp === req.params.otp) {
             const u_otp = await User.updateOne({ email: req.params.id }, { $set: { otp: 'verified' } });
             res.status(200).send('verified_otp');
@@ -429,7 +428,7 @@ router.get('/verifyotp_pass/:id/:otp', async (req, res) => {
         else {
             res.status(400).send('incorrect otp')
         }
-    }else{
+    } else {
         res.status(400).send("User NBot found")
     }
 
@@ -439,7 +438,7 @@ router.get('/change_pass/:id/:newpassword', async (req, res) => {
 
     const user = await User.findOne({ email: req.params.id });
     const saltRounds = 10;
-    if(user){
+    if (user) {
         if (user.otp === 'verified') {
 
             bcrypt.hash(req.params.newpassword, saltRounds, async (err, hash) => {
@@ -453,10 +452,10 @@ router.get('/change_pass/:id/:newpassword', async (req, res) => {
                     res.status(200).send(hash)
                 }
             })
-        }else {
+        } else {
             res.status(400).send('please verify otp first')
         }
-    }else{
+    } else {
         res.status(400).send("User not found")
     }
 
