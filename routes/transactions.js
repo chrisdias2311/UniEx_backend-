@@ -10,12 +10,37 @@ const passport = require('passport');
 const { application } = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('../middlewares/multer')
+const Razorpay = require('razorpay');
+const path = require("path");
 
 const secretKey = "secretKey";
 
 const URL = `https://uniexserver.onrender.com`
 
+const razorpay = new Razorpay({
+    key_id: "rzp_test_Db4QDRjHhe5soI", // Replace with your Razorpay API key   
+    key_secret: "n6469q0wY1Kqm20wL4veQZV4", // Replace with your Razorpay API secret       
+});
 
+
+router.post("/create", async (req, res) => {
+    console.log("HIT")
+    const totalAmountInPaise = req.body.totalAmountInPaise;
+
+    const options = {
+        amount: totalAmountInPaise,
+        currency: "INR",
+    };
+
+    try {
+        const order = await razorpay.orders.create(options);
+
+        res.json({ success: true, order_id: order.id });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Order creation failed." });
+    }
+});
 
 router.post('/soldproducts', async (req, res) => {
     try {
