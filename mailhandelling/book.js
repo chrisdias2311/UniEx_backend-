@@ -10,7 +10,7 @@ async function sendBooked(product_name, email) {
             secure: false,
             auth: {
                 user: "jasonsampy88@gmail.com", //add acc
-                pass: "pohdsrsqvrvohkzv"//change
+                pass: "twwqayplymxjjzqc"//change
             }
         }
     );
