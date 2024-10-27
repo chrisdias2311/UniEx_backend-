@@ -12,7 +12,7 @@ async function sendOtp(otp, email) {
             secure: false,
             auth: {
                 user: "uniexsfit@gmail.com", //add acc
-                pass: "joiaibielixfqfze"//change
+                pass: "twwqayplymxjjzqc"//change
             }
         }
     );
